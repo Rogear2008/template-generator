@@ -71,6 +71,97 @@ public class TemplateConfig {
     private boolean disableEntity;
 
     /**
+     * 是否禁用创建方法
+     */
+    private boolean disableCreateFunction;
+
+    /**
+     * 是否禁用修改方法
+     */
+    private boolean disableUpdateFuncition;
+
+    /**
+     * 是否禁用删除方法
+     */
+    private boolean disableDeleteFunction;
+
+    /**
+     * 是否禁用根据id查询的方法
+     */
+    private boolean disableGetByIdFunction;
+
+    /**
+     * 是否禁用list方法
+     */
+    private boolean disableGetListFunction;
+
+    /**
+     * 是否禁用分页查询的方法
+     */
+    private boolean disableGetPageFunction;
+
+    /**
+     * 其它模板文件路径
+     */
+    private String otherTemplatePath;
+
+    public boolean isDisableCreateFunction() {
+        return disableCreateFunction;
+    }
+
+    public void setDisableCreateFunction(boolean disableCreateFunction) {
+        this.disableCreateFunction = disableCreateFunction;
+    }
+
+    public boolean isDisableUpdateFuncition() {
+        return disableUpdateFuncition;
+    }
+
+    public void setDisableUpdateFuncition(boolean disableUpdateFuncition) {
+        this.disableUpdateFuncition = disableUpdateFuncition;
+    }
+
+    public boolean isDisableDeleteFunction() {
+        return disableDeleteFunction;
+    }
+
+    public void setDisableDeleteFunction(boolean disableDeleteFunction) {
+        this.disableDeleteFunction = disableDeleteFunction;
+    }
+
+    public boolean isDisableGetByIdFunction() {
+        return disableGetByIdFunction;
+    }
+
+    public void setDisableGetByIdFunction(boolean disableGetByIdFunction) {
+        this.disableGetByIdFunction = disableGetByIdFunction;
+    }
+
+    public boolean isDisableGetListFunction() {
+        return disableGetListFunction;
+    }
+
+    public void setDisableGetListFunction(boolean disableGetListFunction) {
+        this.disableGetListFunction = disableGetListFunction;
+    }
+
+    public boolean isDisableGetPageFunction() {
+        return disableGetPageFunction;
+    }
+
+    public void setDisableGetPageFunction(boolean disableGetPageFunction) {
+        this.disableGetPageFunction = disableGetPageFunction;
+    }
+
+    public String getOtherTemplatePath() {
+        return otherTemplatePath;
+    }
+
+    public void setOtherTemplatePath(String otherTemplatePath) {
+        this.otherTemplatePath = otherTemplatePath;
+    }
+
+    /**
      * 不对外爆露
      */
     private TemplateConfig() {
@@ -142,6 +233,24 @@ public class TemplateConfig {
                         break;
                     case SERVICE_IMPL:
                         this.serviceImpl = null;
+                        break;
+                    case CREATE_FUNCTION:
+                        this.disableCreateFunction = true;
+                        break;
+                    case UPDATE_FUNCTION:
+                        this.disableUpdateFuncition = true;
+                        break;
+                    case DELETE_FUNCTION:
+                        this.disableDeleteFunction = true;
+                        break;
+                    case GET_BY_ID_FUNCTION:
+                        this.disableGetByIdFunction = true;
+                        break;
+                    case GET_LIST_FUNCTION:
+                        this.disableGetListFunction = true;
+                        break;
+                    case GET_PAGE_FUNCTION:
+                        this.disableGetPageFunction = true;
                         break;
                     default:
                 }
@@ -292,6 +401,16 @@ public class TemplateConfig {
          */
         public Builder controller(@NotNull String controllerTemplate) {
             this.templateConfig.controller = controllerTemplate;
+            return this;
+        }
+
+        /**
+         * 设置其它模板路径
+         * @param otherTemplatePath 其它模板路径
+         * @return this
+         */
+        public Builder otherTemplatePath(@NotNull String otherTemplatePath) {
+            this.templateConfig.otherTemplatePath = otherTemplatePath;
             return this;
         }
 

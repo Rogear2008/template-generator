@@ -74,6 +74,11 @@ public class TableInfo {
     private String entityName;
 
     /**
+     * 实体名称（小驼峰）
+     */
+    private String entityNameLowerCamel;
+
+    /**
      * mapper名称
      */
     private String mapperName;
@@ -164,6 +169,14 @@ public class TableInfo {
         return this;
     }
 
+    /**
+     * @param entityNameLowerCamel 实体名称（小驼峰）
+     * @return this
+     */
+    public TableInfo setEntityNameLowerCamel(@NotNull String entityNameLowerCamel) {
+        this.entityNameLowerCamel = entityNameLowerCamel;
+        return this;
+    }
     /**
      * 添加字段
      *
@@ -319,6 +332,10 @@ public class TableInfo {
 
     public String getEntityName() {
         return entityName;
+    }
+
+    public String getEntityNameLowerCamel() {
+        return entityNameLowerCamel;
     }
 
     public String getMapperName() {

@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(":mybatis-plus-extension")
+    implementation group: 'com.baomidou', name: 'mybatis-plus-extension', version: '3.5.5'
     implementation "${lib.velocity}"
     implementation "${lib.freemarker}"
     implementation "${lib.beetl}"

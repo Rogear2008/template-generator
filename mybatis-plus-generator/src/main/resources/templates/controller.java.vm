@@ -1,6 +1,10 @@
 package ${package.Controller};
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import ${package.Entity}.${table.entityName};
+import ${package.Service}.${table.serviceName} ;
 #if(${restControllerStyle})
 import org.springframework.web.bind.annotation.RestController;
 #else
@@ -9,6 +13,8 @@ import org.springframework.stereotype.Controller;
 #if(${superControllerClassPackage})
 import ${superControllerClassPackage};
 #end
+
+import java.util.List;
 
 /**
  * <p>
@@ -33,6 +39,85 @@ public class ${table.controllerName} extends ${superControllerClass} {
 #else
 public class ${table.controllerName} {
 #end
+
+    @Autowired
+    private I${table.entityName}Service i${table.entityName}Service;
+    #if(!${config.templateConfig.disableCreateFunction})
+
+    /**
+     * 新增 $!{table.comment}
+     *
+     * @param ${table.entityNameLowerCamel} $!{table.comment}
+     * @return id
+     */
+    @PostMapping
+    public Long create${table.entityName}(@RequestBody ${table.entityName} ${table.entityNameLowerCamel}) {
+        return i${table.entityName}Service.create${table.entityName}(${table.entityNameLowerCamel});
+    }
+    #end
+    #if(!${config.templateConfig.disableUpdateFuncition})
+
+    /**
+     * 修改 $!{table.comment}
+     *
+     * @param ${table.entityNameLowerCamel} $!{table.comment}
+     */
+    @PutMapping
+    public void update${table.entityName}(@RequestBody ${table.entityName} ${table.entityNameLowerCamel}) {
+        i${table.entityName}Service.update${table.entityName}(${table.entityNameLowerCamel});
+    }
+    #end
+    #if(!${config.templateConfig.disableDeleteFunction})
+
+    /**
+     * 删除 $!{table.comment}
+     *
+     * @param id id
+     */
+    @DeleteMapping("/{id}")
+    public void delete${table.entityName}(@PathVariable("id") Long id) {
+        i${table.entityName}Service.delete${table.entityName}(id);
+    }
+    #end
+    #if(!${config.templateConfig.disableGetByIdFunction})
+
+    /**
+     * 根据id查询 $!{table.comment}
+     *
+     * @param id id
+     * @return $!{table.comment}
+     */
+    @GetMapping("/{id}")
+    public ${table.entityName} get${table.entityName}ById(@PathVariable("id") Long id) {
+        return i${table.entityName}Service.get${table.entityName}ById(id);
+    }
+    #end
+    #if(!${config.templateConfig.disableGetListFunction})
+
+    /**
+     * 查询全部 $!{table.comment}
+     *
+     * @return $!{table.comment}集合
+     */
+    @GetMapping("/list")
+    public List<${table.entityName}> get${table.entityName}List() {
+        return i${table.entityName}Service.get${table.entityName}List();
+    }
+    #end
+    #if(!${config.templateConfig.disableGetPageFunction})
+
+    /**
+     * 分页查询 $!{table.comment}
+     *
+     * @param page 分页信息
+     * @param ${table.entityNameLowerCamel} $!{table.comment}
+     * @return Page<${table.entityNameLowerCamel}>
+     */
+    @GetMapping("/page")
+    public Page<${table.entityName}> get${table.entityName}Page(Page<${table.entityName}> page, ${table.entityName} ${table.entityNameLowerCamel}) {
+        return i${table.entityName}Service.get${table.entityName}Page(page, ${table.entityNameLowerCamel});
+    }
+    #end
 
 }
 #end

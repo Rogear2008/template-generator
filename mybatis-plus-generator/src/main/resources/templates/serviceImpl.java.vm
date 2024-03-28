@@ -7,6 +7,10 @@ import ${package.Service}.${table.serviceName};
 #end
 import ${superServiceImplClassPackage};
 import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
+import java.util.List;
 
 /**
  * <p>
@@ -23,6 +27,51 @@ open class ${table.serviceImplName} : ${superServiceImplClass}<${table.mapperNam
 }
 #else
 public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.mapperName}, ${entity}>#if(${table.serviceInterface}) implements ${table.serviceName}#end {
+    #if(!${config.templateConfig.disableCreateFunction})
+
+    @Override
+    public Long create${table.entityName}(${table.entityName} ${table.entityNameLowerCamel}) {
+        super.save(${table.entityNameLowerCamel});
+    return ${table.entityNameLowerCamel}.getId();
+    }
+    #end
+    #if(!${config.templateConfig.disableUpdateFuncition})
+
+    @Override
+    public void update${table.entityName}(${table.entityName} ${table.entityNameLowerCamel}) {
+        super.updateById(${table.entityNameLowerCamel});
+    }
+    #end
+    #if(!${config.templateConfig.disableDeleteFunction})
+
+    @Override
+    public void delete${table.entityName}(Long id) {
+        super.removeById(id);
+    }
+    #end
+    #if(!${config.templateConfig.disableGetByIdFunction})
+
+    @Override
+    public ${table.entityName} get${table.entityName}ById(Long id) {
+        return super.getById(id);
+    }
+    #end
+    #if(!${config.templateConfig.disableGetListFunction})
+
+    @Override
+    public List<${table.entityName}> get${table.entityName}List() {
+        return super.list();
+    }
+    #end
+    #if(!${config.templateConfig.disableGetPageFunction})
+
+    @Override
+    public Page<${table.entityName}> get${table.entityName}Page(Page<${table.entityName}> page, ${table.entityName} ${table.entityNameLowerCamel}) {
+        LambdaQueryWrapper<${table.entityName}> queryWrapper = new LambdaQueryWrapper<${table.entityName}>()
+            .eq(${table.entityNameLowerCamel}.getId() != null, ${table.entityName}::getId, ${table.entityNameLowerCamel}.getId());
+        return baseMapper.selectPage(page, queryWrapper);
+    }
+    #end
 
 }
 #end

@@ -31,7 +31,7 @@ public enum OutputFile {
     /**
      * 已弃用，已重构自定义文件生成，3.5.4版本会删除
      */
-    @Deprecated
+//    @Deprecated
     other,
     parent;
 }

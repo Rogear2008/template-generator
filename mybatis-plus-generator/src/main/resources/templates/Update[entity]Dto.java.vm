@@ -1,0 +1,13 @@
+package ${currentPackage};
+
+/**
+ * <p>
+ * $!{table.comment} updateDto
+ * </p>
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+public class ${fileName} {
+
+}

@@ -15,6 +15,7 @@
  */
 package com.baomidou.mybatisplus.generator.engine;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.generator.config.*;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.*;
 
 
 /**
@@ -51,6 +53,8 @@ public abstract class AbstractTemplateEngine {
      * 配置信息
      */
     private ConfigBuilder configBuilder;
+
+    private static final String[] DEFAULT_FILE_NAME = {"controller.java.vm", "service.java.vm", "serviceImpl.java.vm", "mapper.java.vm", "mapper.xml.vm", "entity.java.vm", "entity.kt.vm"};
 
     /**
      * 模板引擎初始化
@@ -179,6 +183,24 @@ public abstract class AbstractTemplateEngine {
     }
 
     /**
+     * ??controller??
+     *
+     * @param tableInfo ???
+     * @param objectMap ????
+     * @since 3.5.0
+     */
+    protected void outputOther(@NotNull TableInfo tableInfo, @NotNull Map<String, Object> objectMap) {
+        String otherPath = (String) objectMap.get("otherPath");
+        String templateName = (String) objectMap.get("templateName");
+        String templateFilePath = (String) objectMap.get("templateFilePath");
+        this.getTemplateFilePath(templateFilePath).ifPresent((other) -> {
+            String entityName = tableInfo.getEntityName();
+            String otherFile = String.format(otherPath + File.separator + templateName + this.suffixJavaOrKt(), entityName);
+            this.outputFile(this.getOutputFile(otherFile, OutputFile.other), objectMap, other, this.getConfigBuilder().getStrategyConfig().controller().isFileOverride());
+        });
+    }
+
+    /**
      * 输出文件
      *
      * @param file         文件
@@ -240,6 +262,7 @@ public abstract class AbstractTemplateEngine {
             ConfigBuilder config = this.getConfigBuilder();
             List<TableInfo> tableInfoList = config.getTableInfoList();
             tableInfoList.forEach(tableInfo -> {
+                tableInfo.setEntityNameLowerCamel(tableInfo.getEntityName().substring(0, 1).toLowerCase() + tableInfo.getEntityName().substring(1));
                 Map<String, Object> objectMap = this.getObjectMap(config, tableInfo);
                 Optional.ofNullable(config.getInjectionConfig()).ifPresent(t -> {
                     // 添加自定义属性
@@ -255,11 +278,115 @@ public abstract class AbstractTemplateEngine {
                 outputService(tableInfo, objectMap);
                 // controller
                 outputController(tableInfo, objectMap);
+
+                String entityPath = this.getPathInfo(OutputFile.entity);
+                String otherPath = entityPath.substring(0, entityPath.lastIndexOf("/"));
+                objectMap.put("otherPath", otherPath);
+                objectMap.put("parentPackage", config.getPackageConfig().getParent());
+                objectMap.put("currentPackage", config.getPackageConfig().getParent());
+                // 遍历生成其它文件
+                String rootTemplatePath;
+                rootTemplatePath = System.getProperty("user.dir") + "/src/main/resources/templates";
+                String otherTemplatePath = config.getTemplateConfig().getOtherTemplatePath();
+                if (StringUtils.isNotBlank(otherTemplatePath)) {
+                    rootTemplatePath = otherTemplatePath;
+                }
+                objectMap.put("rootTemplatePath", rootTemplatePath);
+                File file = new File(rootTemplatePath);
+                output(tableInfo, file, objectMap);
             });
         } catch (Exception e) {
             throw new RuntimeException("无法创建文件，请检查配置信息！", e);
         }
         return this;
+    }
+
+    /**
+     * 生成其它文件
+     *
+     * @param tableInfo
+     * @param file
+     * @param objectMap
+     */
+    private void output(TableInfo tableInfo, File file, Map<String, Object> objectMap) {
+        if (file == null) {
+            return;
+        }
+        List<File> directoryList = new ArrayList<>();
+        List<File> fileList = new ArrayList<>();
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files == null || files.length == 0) {
+                return;
+            }
+            for (File file1 : files) {
+                if (file1.isDirectory()) {
+                    directoryList.add(file1);
+                } else {
+                    fileList.add(file1);
+                }
+            }
+
+            // 设置路径等信息
+            String currentPackage = file.getPath().replace((String) objectMap.get("rootTemplatePath"), "").replace(File.separator, ".");
+            if (currentPackage.startsWith(File.separator) || currentPackage.startsWith(".")) {
+                currentPackage = currentPackage.substring(1);
+            }
+            String oldParentPackage = (String) objectMap.get("parentPackage");
+            if (StringUtils.isNotBlank(currentPackage)) {
+                objectMap.put("currentPackage", oldParentPackage + "." + currentPackage);
+            }
+            String oldOtherPath = (String) objectMap.get("otherPath");
+            if (StringUtils.isNotBlank(currentPackage)) {
+                objectMap.put("otherPath", oldOtherPath + File.separator + file.getName());
+            }
+
+            // 生成文件
+            if (CollectionUtils.isNotEmpty(fileList)) {
+                for (File file1 : fileList) {
+                    output(tableInfo, file1, objectMap);
+                }
+            }
+
+            // 第归处理文件夹
+            if (CollectionUtils.isNotEmpty(directoryList)) {
+                for (File file1 : directoryList) {
+                    output(tableInfo, file1, objectMap);
+                    if (file1.isDirectory() && file1.listFiles() != null && file1.listFiles().length > 0 && StringUtils.isNotBlank(currentPackage)) {
+                        // ??????????
+                        String otherPath = (String) objectMap.get("otherPath");
+                        objectMap.put("otherPath", otherPath.substring(0, otherPath.lastIndexOf(File.separator)));
+                    }
+                }
+            }
+            return;
+        }
+
+        String name = file.getName();
+        if (!name.endsWith(".vm") || Arrays.stream(DEFAULT_FILE_NAME).anyMatch(name::equals)) {
+            return;
+        }
+
+        String entityName = tableInfo.getEntityName();
+        String templateName = name.split("\\.")[0];
+        templateName = templateName.substring(0, 1).toUpperCase() + templateName.substring(1);
+        if (templateName.contains("[entity]")) {
+            templateName = templateName.replace("[entity]", entityName);
+        } else {
+            templateName = entityName.substring(0, 1).toUpperCase() + entityName.substring(1) + templateName;
+        }
+        String subStr = (file.getPath().substring(file.getPath().lastIndexOf(File.separator + "templates" + File.separator)));
+        String templateFilePath = subStr.substring(0, subStr.lastIndexOf(".vm"));
+        objectMap.put("fileName", templateName);
+        objectMap.put("templateName", templateName);
+        objectMap.put("templateFilePath", templateFilePath);
+        this.outputOther(tableInfo, objectMap);
+
+    }
+
+    protected @NotNull Optional<String> getTemplateFilePath(@NotNull String templatePath) {
+        String filePath = templatePath;
+        return StringUtils.isNotBlank(filePath) ? Optional.of(this.templateFilePath(filePath)) : Optional.empty();
     }
 
     /**
