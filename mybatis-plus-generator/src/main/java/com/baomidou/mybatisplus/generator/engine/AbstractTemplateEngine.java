@@ -286,7 +286,7 @@ public abstract class AbstractTemplateEngine {
                 objectMap.put("currentPackage", config.getPackageConfig().getParent());
                 // 遍历生成其它文件
                 String rootTemplatePath;
-                rootTemplatePath = System.getProperty("user.dir") + "/src/main/resources/templates";
+                rootTemplatePath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "templates";
                 String otherTemplatePath = config.getTemplateConfig().getOtherTemplatePath();
                 if (StringUtils.isNotBlank(otherTemplatePath)) {
                     rootTemplatePath = otherTemplatePath;
