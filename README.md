@@ -1,110 +1,95 @@
-<p align="center">
-  <a href="https://github.com/baomidou/mybatis-plus">
-   <img alt="Mybatis-Plus-Logo" src="https://raw.githubusercontent.com/baomidou/logo/master/mybatis-plus-logo-new-mini.png">
-  </a>
-</p>
+# 为什么要写这个项目
 
-<p align="center">
-  Born To Simplify Development
-</p>
+mybatis-plus-generator可以生成controller、service、serviceImpl和entity，但是使用的时候有两点不好用：
 
-<p align="center">
-  <a href="https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.baomidou%22%20AND%20a%3A%22mybatis-plus%22">
-    <img alt="maven" src="https://img.shields.io/maven-central/v/com.baomidou/mybatis-plus.svg?style=flat-square">
-  </a>
+1. 生成的controller、service和serviceImpl是空的内容，没有内容。当然官方说可以自定义模板，然后再去生成；
+2. 只能生成controller、service、serviceImpl和entity，不能生成别的代码。
 
-  <a href="https://www.apache.org/licenses/LICENSE-2.0">
-    <img alt="code style" src="https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square">
-  </a>
+基于以上2点，所以写了template-generator这个项目。
 
-  <a href="https://gitter.im/baomidou/mybatis-plus?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
-    <img alt="Join the chat at https://gitter.im/baomidou/mybatis-plus" src="https://badges.gitter.im/baomidou/mybatis-plus.svg">
-  </a>
-</p>
+# 如何使用template-generator
 
-[企业版 Mybatis-Mate 高级特性](https://gitee.com/baomidou/mybatis-mate-examples)
+mybatis-plus原有的功能不受影响，该怎么用还是怎么用。<a herf="https://baomidou.com/">mybatis-plus官网</a>
 
-添加 `微信 wx153666` 备注进 mp 群
+创建一个项目，加载依赖
+```java
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.0.33</version>
+        </dependency>
 
-> 不允许非法项目使用，后果自负
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus</artifactId>
+            <version>3.5.5</version>
+        </dependency>
 
-# Special user
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-generator</artifactId>
+            <version>template-generator-1.0.0</version>
+        </dependency>
 
-<p>
-  <a href="https://www.diboot.com/?from=mp" target="_blank">
-   <img alt="Mybatis-Plus-Logo" src="https://www.diboot.com/diboot_slogon.png" width="210px" height="75px">
-  </a>
-  <a href="http://aizuda.com/?from=mp" target="_blank">
-   <img alt="Mybatis-Plus-Logo" src="https://baomidou.com/img/aizuda.png" width="210px" height="75px">
-  </a>
-</p>
-
-## What is MyBatis-Plus?
-
-MyBatis-Plus is an powerful enhanced toolkit of MyBatis for simplify development. This toolkit provides some efficient, useful, out-of-the-box features for MyBatis, use it can effectively save your development time.
-
-## Links
-
-- [Documentation](https://baomidou.com)
-- [Code Generator](https://github.com/baomidou/generator)
-- [Samples](https://github.com/baomidou/mybatis-plus-samples)
-- [Showcase](https://github.com/baomidou/awesome-mybatis-plus)
-- [企业版 Mybatis-Mate 高级特性](https://gitee.com/baomidou/mybatis-mate-examples)
-
-## Features
-
--   Fully compatible with MyBatis
--   Auto configuration on startup
--   Out-of-the-box interfaces for operate database
--   Powerful and flexible where condition wrapper
--   Multiple strategy to generate primary key
--   Lambda-style API
--   Almighty and highly customizable code generator
--   Automatic paging operation
--   SQL Inject defense
--   Support active record
--   Support pluggable custom interface
--   Build-in many useful extensions
-
-## Getting started
-
--   Add MyBatis-Plus dependency
-    - Latest Version: [![Maven Central](https://img.shields.io/maven-central/v/com.baomidou/mybatis-plus.svg)](https://search.maven.org/search?q=g:com.baomidou%20a:mybatis-*)
-    - Maven:
-      ```xml
-      <dependency>
-          <groupId>com.baomidou</groupId>
-          <artifactId>mybatis-plus-boot-starter</artifactId>
-          <version>Latest Version</version>
-      </dependency>
-      ```
-    - Gradle
-      ```groovy
-      compile group: 'com.baomidou', name: 'mybatis-plus-boot-starter', version: 'Latest Version'
-      ```
--   Modify mapper file extends BaseMapper interface
-
-    ```java
-    public interface UserMapper extends BaseMapper<User> {
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
+        </dependency>
+```
+然后创建一个main方法进行配置，例如：
+```java
+    public static void main(String[] args) {
+    FastAutoGenerator.create("jdbc:mysql://127.0.0.1:3306/generator?serverTimezone=GMT%2b8&useUnicode=true", "root", "root")
+    .globalConfig(builder -> {
+    builder.author("Rogear") // 设置作者
+//                    .enableSwagger() // 开启 swagger 模式
+//                    .enableSpringdoc() // 开启 springdoc 模式
+    .dateType(DateType.ONLY_DATE)
+    .outputDir(System.getProperty("user.dir") + "\\src\\main\\java") // 指定输出目录
+    .disableOpenDir();
+    })
+    .packageConfig(builder -> {
+    builder.parent("com.rogear.singledemo") // 设置父包名
+    .moduleName(null) // 设置父模块名
+    // 设置mapperXml生成路径
+    .pathInfo(Collections.singletonMap(OutputFile.xml, System.getProperty("user.dir") + "\\src\\main\\resources\\mapper\\")); // 设置mapperXml生成路径
+    })
+    .strategyConfig(builder -> {
+    builder.controllerBuilder().enableRestStyle();
+//                builder.serviceBuilder().formatServiceFileName("%sService"); // 去掉service接口首字母I
+//                builder.entityBuilder().enableLombok();
+//                builder.mapperBuilder().enableBaseResultMap();
+//                builder.addTablePrefix("ud_");
+    builder.addInclude("book");
+//                    builder.entityBuilder().superClass(BaseEntity.class);
+//                    builder.entityBuilder().addIgnoreColumns("id", "archived", "update_time", "create_time", "version");
+    })
+    .templateConfig(builder -> {
+//                builder.disable(TemplateType.CONTROLLER); // 不生成controller
+//                builder.controller("controller123.java.vm");  // 使用制定模板生成controller
+//                    builder.otherTemplatePath(System.getProperty("user.dir") + "\\module-demo\\src\\main\\resources\\templates");
+    // 不生成对应方法
+//                builder.disable(TemplateType.CREATE_FUNCTION, TemplateType.UPDATE_FUNCTION, TemplateType.DELETE_FUNCTION, TemplateType.GET_BY_ID_FUNCTION, TemplateType.GET_LIST_FUNCTION, TemplateType.GET_PAGE_FUNCTION);
+    })
+    .execute();
 
     }
-    ```
+```
+然后运行main方法生成代码（注意修改数据库连接、文件路径等）
+![生成的代码](./relation/images/20240401225758.png)
+默认会生成新增、修改、删除、根据id查询、list查询和分页查询方法，如果不需要对应的方法，可以在main方法中修改配置。例如不想生成新增方法，可以如下配置：
+```java
+builder.disable(TemplateType.CREATE_FUNCTION)
+```
 
-- Use it
-  ``` java
-  List<User> userList = userMapper.selectList(
-          new QueryWrapper<User>()
-                  .lambda()
-                  .ge(User::getAge, 18)
-  );
-  ```
-    MyBatis-Plus will execute the following SQL
-    ```sql
-    SELECT * FROM user WHERE age >= 18
-    ```
+如果修改文件模板，方式和mybatis-plus一样，自定义文件模板放到resources/template目录下即可。如果想生成其它文件，可以编写对应的模板文件，生成的代码文件目录结构与模板一致。
+![生成的代码](./relation/images/20240401225758.png)
+生成文件的名称是“对象名称+模板名称”，如果希望对象的名称不在最前面可以在模板名称中使用“[entity]”进行占位。
 
-> This showcase is just a small part of MyBatis-Plus features. If you want to learn more, please refer to the [documentation](https://baomidou.com).
+# 注意
 
-## License
-
-MyBatis-Plus is under the Apache 2.0 license. See the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0) file for details.
+如果是多模块的工程使用template-generator，需要在配置中指定模板的路径，例如：
+```java
+builder.otherTemplatePath(System.getProperty("user.dir") + "\\module-demo\\src\\main\\resources\\templates");
+```

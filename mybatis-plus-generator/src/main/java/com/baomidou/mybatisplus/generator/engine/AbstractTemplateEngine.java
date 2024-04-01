@@ -280,7 +280,7 @@ public abstract class AbstractTemplateEngine {
                 outputController(tableInfo, objectMap);
 
                 String entityPath = this.getPathInfo(OutputFile.entity);
-                String otherPath = entityPath.substring(0, entityPath.lastIndexOf("/"));
+                String otherPath = entityPath.substring(0, entityPath.lastIndexOf(File.separator));
                 objectMap.put("otherPath", otherPath);
                 objectMap.put("parentPackage", config.getPackageConfig().getParent());
                 objectMap.put("currentPackage", config.getPackageConfig().getParent());
