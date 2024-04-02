@@ -77,7 +77,7 @@ mybatis-plus原有的功能不受影响，该怎么用还是怎么用。<a herf=
     }
 ```
 然后运行main方法生成代码（注意修改数据库连接、文件路径等）
-![生成的代码](./relation/images/20240401225758.png)
+![生成的代码](https://github.com/Rogear2008/template-generator/blob/master/relation/images/20240401225758.png)
 默认会生成新增、修改、删除、根据id查询、list查询和分页查询方法，如果不需要对应的方法，可以在main方法中修改配置。例如不想生成新增方法，可以如下配置：
 ```java
 builder.disable(TemplateType.CREATE_FUNCTION)
